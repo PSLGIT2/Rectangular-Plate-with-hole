@@ -1,0 +1,49 @@
+!****************************************************************************
+!***    Lochscheibe unter Zuglast mit plastischer Rechnung
+!****************************************************************************
+FINISH                       ! Close open processes
+/CLEAR,Start                 ! Delete data bases
+
+/PREP7
+
+!---ElementType und Material
+ET,1,PLANE183                ! Elementtype Plane182
+MP,EX,1,210000               ! Youngs-Modul 210000 N/mm^2
+MP,PRXY,1,0.3                ! Poisson's ratio
+TB,BKIN,1,                   ! Biliniear isotrope consolidation ...
+TBDATA,1,235,0,
+
+!---Build Geometry
+RECTNG,0,50,0,50             ! Rectangle with coord. x1=0,x2=50,y1=0,y2=50
+CYL4,0,0,10                  ! Circle with radius 10mm um at 0,0
+ASBA,1,2                     !
+RECTNG,50,100,0,50           ! 2. Rectangle
+AGLUE,All                    ! Glue all together
+
+!---Mesh (mapped)
+LESIZE,5,,,14                !
+LESIZE,1,,,7                 !
+LESIZE,8,,,14,0.2            !
+LESIZE,10,,,14,0.2           !
+LCCAT,7,11                   !
+MSHKEY,1                     !
+AMESH,All                    !
+
+!---Boundary conditions
+DL,10, ,SYMM                 !
+DL,8, ,SYMM                  !
+DL,1, ,SYMM                  !
+
+!---Belastung
+SFL,4,PRES,-100              ! Pressure of 100 N/mm^2 on line 4
+
+!---Start der Loesungsphase
+/SOLU
+!NSUBST,10
+!NLGEOM,ON
+SOLVE                        ! Solve
+
+
+!---Ergebnisdarstellung
+/POST1                       ! Aufruf Postproz.
+PLESOL,S,EQV                 ! von-Mises
